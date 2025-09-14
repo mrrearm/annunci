@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bacheca Annunci - Crea il tuo annuncio perfetto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-subtitle {
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 1.1rem;
+            font-weight: normal;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            min-height: calc(100vh - 300px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .template-option {
+            aspect-ratio: 1;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .template-option.active {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        /* Template Styles */
+        .template-classic { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .template-sunset { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+        .template-ocean { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .template-forest { background: linear-gradient(135deg, #56ab2f, #a8e6cf); }
+        .template-fire { background: linear-gradient(135deg, #ff416c, #ff4b2b); }
+        .template-purple { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+        .template-gold { background: linear-gradient(135deg, #f7971e, #ffd200); }
+        .template-mint { background: linear-gradient(135deg, #00b09b, #96c93d); }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .share-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-whatsapp { background: #25D366; color: white; }
+        .btn-facebook { background: #1877F2; color: white; }
+        .btn-telegram { background: #0088CC; color: white; }
+        .btn-instagram { background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D); color: white; }
+
+        /* Preview Area */
+        .preview-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .preview-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .announcement-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .announcement-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .announcement-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            width: 100%;
+        }
+
+        .announcement-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .announcement-description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            white-space: pre-wrap;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .footer h3 {
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer p {
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 120px;
+                justify-content: center;
+            }
+
+            .share-buttons {
+                justify-content: center;
+            }
+
+            .announcement-title {
+                font-size: 1.8rem;
+            }
+
+            .announcement-description {
+                font-size: 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar, .preview-area {
+            animation: fadeInUp 0.8s ease;
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 9999;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" onclick="scrollToTop()">📢 Bacheca Annunci</div>
+        <div class="logo-subtitle">Crea annunci professionali in pochi clic</div>
+    </header>
+
+    <!-- Loading Animation -->
+    <div class="loading" id="loadingModal">
+        <div class="spinner"></div>
+        <p>Generando la tua immagine...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>✨ Crea il tuo Annuncio</h2>
+            
+            <div class="form-group">
+                <label for="title">📝 Titolo dell'Annuncio</label>
+                <input type="text" id="title" placeholder="Inserisci il titolo..." oninput="updatePreview()">
+            </div>
+
+            <div class="form-group">
+                <label for="description">📄 Descrizione</label>
+                <textarea id="description" placeholder="Scrivi la descrizione del tuo annuncio..." oninput="updatePreview()"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>🎨 Scegli il Modello</label>
+                <div class="template-grid">
+                    <div class="template-option template-classic active" onclick="selectTemplate('classic')" title="Classico"></div>
+                    <div class="template-option template-sunset" onclick="selectTemplate('sunset')" title="Tramonto"></div>
+                    <div class="template-option template-ocean" onclick="selectTemplate('ocean')" title="Oceano"></div>
+                    <div class="template-option template-forest" onclick="selectTemplate('forest')" title="Foresta"></div>
+                    <div class="template-option template-fire" onclick="selectTemplate('fire')" title="Fuoco"></div>
+                    <div class="template-option template-purple" onclick="selectTemplate('purple')" title="Viola"></div>
+                    <div class="template-option template-gold" onclick="selectTemplate('gold')" title="Oro"></div>
+                    <div class="template-option template-mint" onclick="selectTemplate('mint')" title="Menta"></div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="saveToPDF()">📄 Salva PDF</button>
+                <button class="btn btn-secondary" onclick="saveToJPG()">🖼️ Salva JPG</button>
+            </div>
+
+            <div class="form-group">
+                <label>🚀 Condividi</label>
+                <div class="share-buttons">
+                    <button class="btn btn-whatsapp" onclick="shareOnWhatsApp()">📱 WhatsApp</button>
+                    <button class="btn btn-facebook" onclick="shareOnFacebook()">📘 Facebook</button>
+                    <button class="btn btn-telegram" onclick="shareOnTelegram()">✈️ Telegram</button>
+                    <button class="btn btn-instagram" onclick="shareOnInstagram()">📷 Instagram</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Preview Area -->
+        <main class="preview-area">
+            <h2 class="preview-title">👀 Anteprima del tuo Annuncio</h2>
+            <div id="announcement-preview" class="announcement-preview">
+                <div class="announcement-content">
+                    <h3 class="announcement-title" id="preview-title">Il tuo titolo apparirà qui...</h3>
+                    <p class="announcement-description" id="preview-description">La tua descrizione apparirà qui...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <h3>✨ Bacheca Annunci Premium</h3>
+            <p>Crea annunci professionali in pochi clic. Design moderno, condivisione istantanea.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">© 2025 Bacheca Annunci. Fatto con ❤️ per te.</p>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" onclick="scrollToTop()">↑</button>
+
+    <script>
+        let currentTemplate = 'classic';
+        let currentImageBlob = null;
+        
+        const templates = {
+            classic: 'linear-gradient(135deg, #667eea, #764ba2)',
+            sunset: 'linear-gradient(135deg, #ff9a9e, #fecfef)',
+            ocean: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+            forest: 'linear-gradient(135deg, #56ab2f, #a8e6cf)',
+            fire: 'linear-gradient(135deg, #ff416c, #ff4b2b)',
+            purple: 'linear-gradient(135deg, #a8edea, #fed6e3)',
+            gold: 'linear-gradient(135deg, #f7971e, #ffd200)',
+            mint: 'linear-gradient(135deg, #00b09b, #96c93d)'
+        };
+
+        function updatePreview() {
+            const title = document.getElementById('title').value || 'Il tuo titolo apparirà qui...';
+            const description = document.getElementById('description').value || 'La tua descrizione apparirà qui...';
+            
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-description').textContent = description;
+            
+            // Update image blob whenever content changes
+            generateImageBlob();
+        }
+
+        function selectTemplate(template) {
+            // Remove active class from all templates
+            document.querySelectorAll('.template-option').forEach(t => t.classList.remove('active'));
+            
+            // Add active class to selected template
+            document.querySelector(`.template-${template}`).classList.add('active');
+            
+            // Update preview background
+            const preview = document.getElementById('announcement-preview');
+            preview.style.background = templates[template];
+            
+            // Adjust text color based on template
+            const titleElement = document.getElementById('preview-title');
+            const descElement = document.getElementById('preview-description');
+            
+            if (template === 'gold' || template === 'mint' || template === 'forest' || template === 'sunset' || template === 'purple') {
+                titleElement.style.color = '#333';
+                descElement.style.color = '#555';
+            } else {
+                titleElement.style.color = 'white';
+                descElement.style.color = '#f0f0f0';
+            }
+            
+            currentTemplate = template;
+            generateImageBlob();
+        }
+
+        function showLoading() {
+            document.getElementById('loadingModal').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingModal').style.display = 'none';
+        }
+
+        function generateImageBlob() {
+            const element = document.getElementById('announcement-preview');
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    currentImageBlob = blob;
+                }, 'image/jpeg', 0.9);
+            });
+        }
+
+        function saveToPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('announcement-preview');
+            
+            showLoading();
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+                pdf.save('annuncio.pdf');
+                hideLoading();
+            });
+        }
+
+        function saveToJPG() {
+            const element = document.getElementById('announcement-preview');
+            
+            showLoading();
+            
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'annuncio.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+                hideLoading();
+            });
+        }
+
+        function shareOnWhatsApp() {
+            const title = document.getElementById('title').value || 'Nuovo Annuncio';
+            const description = document.getElementById('description').value || 'Descrizione annuncio';
+            
+            showLoading();
+            
+            const element = document.getElementById('announcement-preview');
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const text = `*${title}*%0A%0A${description}%0A%0ACreato con Bacheca Annunci`;
+                    
+                    // For mobile devices, try to share the image
+                    if (navigator.share && navigator.canShare && navigator.canShare({files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]})) {
+                        navigator.share({
+                            title: title,
+                            text: `${title}\n\n${description}\n\nCreato con Bacheca Annunci`,
+                            files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]
+                        });
+                    } else {
+                        // Fallback to text sharing
+                        window.open(`https://wa.me/?text=${text}`, '_blank');
+                    }
+                    
+                    hideLoading();
+                }, 'image/jpeg', 0.9);
+            });
+        }
+
+        function shareOnFacebook() {
+            const title = document.getElementById('title').value || 'Nuovo Annuncio';
+            const description = document.getElementById('description').value || 'Descrizione annuncio';
+            
+            showLoading();
+            
+            const element = document.getElementById('announcement-preview');
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    // Check if Web Share API is available
+                    if (navigator.share && navigator.canShare && navigator.canShare({files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]})) {
+                        navigator.share({
+                            title: title,
+                            text: `${title}\n\n${description}\n\nCreato con Bacheca Annunci`,
+                            files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]
+                        });
+                    } else {
+                        // Download image and provide instructions
+                        const link = document.createElement('a');
+                        link.download = 'annuncio_facebook.jpg';
+                        link.href = canvas.toDataURL('image/jpeg', 0.9);
+                        link.click();
+                        
+                        setTimeout(() => {
+                            alert('📘 Immagine scaricata! Caricala manualmente su Facebook per condividerla con i tuoi amici! 🚀');
+                        }, 500);
+                    }
+                    
+                    hideLoading();
+                }, 'image/jpeg', 0.9);
+            });
+        }
+
+        function shareOnTelegram() {
+            const title = document.getElementById('title').value || 'Nuovo Annuncio';
+            const description = document.getElementById('description').value || 'Descrizione annuncio';
+            
+            showLoading();
+            
+            const element = document.getElementById('announcement-preview');
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    // Check if Web Share API is available
+                    if (navigator.share && navigator.canShare && navigator.canShare({files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]})) {
+                        navigator.share({
+                            title: title,
+                            text: `${title}\n\n${description}\n\nCreato con Bacheca Annunci`,
+                            files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]
+                        });
+                    } else {
+                        // Fallback to text sharing
+                        const text = `*${title}*\n\n${description}\n\nCreato con Bacheca Annunci`;
+                        window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(text)}`, '_blank');
+                    }
+                    
+                    hideLoading();
+                }, 'image/jpeg', 0.9);
+            });
+        }
+
+        function shareOnInstagram() {
+            const title = document.getElementById('title').value || 'Nuovo Annuncio';
+            
+            showLoading();
+            
+            const element = document.getElementById('announcement-preview');
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    // Check if Web Share API is available
+                    if (navigator.share && navigator.canShare && navigator.canShare({files: [new File([blob], 'annuncio.jpg', {type: 'image/jpeg'})]})) {
+                        navigator.share({
+                            title: title,
+                            files: [new File([blob], 'annuncio_instagram.jpg', {type: 'image/jpeg'})]
+                        });
+                    } else {
+                        // Download the image for manual upload
+                        const link = document.createElement('a');
+                        link.download = 'annuncio_instagram.jpg';
+                        link.href = canvas.toDataURL('image/jpeg', 0.9);
+                        link.click();
+                        
+                        setTimeout(() => {
+                            alert('📷 Immagine scaricata! Aprí l\'app Instagram e carica l\'immagine dalle tue foto per condividerla! ✨');
+                        }, 500);
+                    }
+                    
+                    hideLoading();
+                }, 'image/jpeg', 0.9);
+            });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Initialize
+        selectTemplate('classic');
+        updatePreview();
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', function() {
+            const scrollTop = document.querySelector('.scroll-top');
+            if (window.pageYOffset > 300) {
+                scrollTop.style.display = 'block';
+            } else {
+                scrollTop.style.display = 'none';
+            }
+        });
+
+        // Generate initial image blob
+        setTimeout(() => {
+            generateImageBlob();
+        }, 1000);
+    </script>
+</body>
+</html>
